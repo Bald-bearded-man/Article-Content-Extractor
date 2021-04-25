@@ -20,3 +20,4 @@ Yes... That's all I can think of...
 
 ## License
 
+This code and software is published under license GPLv3.
