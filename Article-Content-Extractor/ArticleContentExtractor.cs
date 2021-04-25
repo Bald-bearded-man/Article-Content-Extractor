@@ -6,11 +6,26 @@ namespace Article_Content_Extractor
 {
     public class ArticleContentExtractor
     {
-        public static String GetArticleContent(String strURL)
+        /// <summary>
+        /// Extract content from HTML fetched from URL
+        /// </summary>
+        /// <param name="strURL"></param>
+        /// <returns></returns>
+        public static String GetArticleContentFromURL(String strURL)
         {
             HttpClient hc = new HttpClient();
             String strContent = hc.GetStringAsync(strURL).GetAwaiter().GetResult();
-            strContent = RemoveScripts(strContent);
+            return GetArticleContentFromRawHTML(strContent);
+        }
+
+        /// <summary>
+        /// Extract content from a raw HTML document
+        /// </summary>
+        /// <param name="strRawHTMLContent"></param>
+        /// <returns></returns>
+        public static String GetArticleContentFromRawHTML(String strRawHTMLContent)
+        {
+            String strContent = RemoveScripts(strRawHTMLContent);
             strContent = RemoveHeaders(strContent);
             strContent = RemoveSoloTags(strContent);
             strContent = CleanAttributes(strContent);
