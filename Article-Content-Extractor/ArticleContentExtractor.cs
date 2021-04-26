@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Article_Content_Extractor
 {
@@ -13,8 +16,8 @@ namespace Article_Content_Extractor
         /// <returns></returns>
         public static String GetArticleContentFromURL(String strURL)
         {
-            HttpClient hc = new HttpClient();
-            String strContent = hc.GetStringAsync(strURL).GetAwaiter().GetResult();
+            WebClient wc = new WebClient();
+            String strContent = wc.DownloadString(strURL);
             return GetArticleContentFromRawHTML(strContent);
         }
 
@@ -35,14 +38,15 @@ namespace Article_Content_Extractor
             strContent = RemovingUnusedTags(strContent);
             strContent = RemoveSuccessiveTags(strContent);
             strContent = RemoveEmptyLines(strContent);
-            return LookingForContent(strContent);
+            strContent = LookingForContent(strContent);
+            return OptimiseContent(strContent);
         }
 
 
         private static String RemoveScripts(String strContent)
         {
             bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<script.*>((?!<script>)[.\\s\\S])*<\\/script>"))
+            foreach (Match m in Regex.Matches(strContent, @"<script.*>((?!<\/?script>)[.\s\S])*<\/script>"))
             {
                 strContent = strContent.Replace(m.Value, "");
                 blnAtLeastOneChange = true;
@@ -68,7 +72,7 @@ namespace Article_Content_Extractor
         private static String RemoveSoloTags(String strContent)
         {
             bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+[\\w\\t\\r\\n\\s\"'’   \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?]+[\\/]>"))
+            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+[\\w\\t\\r\\n\\s\"'’   \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+[\\/]>"))
             {
                 strContent = strContent.Replace(m.Value, "");
                 blnAtLeastOneChange = true;
@@ -81,7 +85,7 @@ namespace Article_Content_Extractor
         private static String CleanAttributes(String strContent)
         {
             bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+ ([\\w\\r\\n\\s\\\"'’ \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?]+)>"))
+            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+ ([\\w\\r\\n\\s\\\"'’ \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+)>"))
             {
                 strContent = strContent.Replace(m.Groups[1].Value, "");
                 blnAtLeastOneChange = true;
@@ -200,6 +204,12 @@ namespace Article_Content_Extractor
                 return 0;
             else
                 return strContent.Length / (decimal)intNbBalise;
+        }
+
+        private static String OptimiseContent(String strContent)
+        {
+            strContent =  Regex.Replace(strContent, @"<\/?[\w]+[\r\n\s]*>", "\n");
+            return HttpUtility.HtmlDecode(strContent);
         }
     }
 }
