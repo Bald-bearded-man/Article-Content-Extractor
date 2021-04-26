@@ -33,11 +33,9 @@ namespace Article_Content_Extractor
             strContent = RemoveComments(strContent);
             strContent = RemoveUnwantedTags(strContent);
             strContent = RemovingUnusedTags(strContent);
-            string strCleanedContent = "";
-            foreach (String strLine in strContent.Split('\n'))
-                if (!String.IsNullOrWhiteSpace(strLine))
-                    strCleanedContent += strLine + "\n";
-            return LookingForContent(strCleanedContent);
+            strContent = RemoveSuccessiveTags(strContent);
+            strContent = RemoveEmptyLines(strContent);
+            return LookingForContent(strContent);
         }
 
 
@@ -142,6 +140,32 @@ namespace Article_Content_Extractor
             return strContent;
         }
 
+        private static String RemoveSuccessiveTags(String strContent)
+        {
+            bool blnAtLeastOneChange = false;
+            foreach (Match m in Regex.Matches(strContent, @"<\/?[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*(<\/?[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*)+"))
+            {
+                if (Regex.IsMatch(strContent, @"<\/p[\s\r\n]*>"))
+                    strContent = strContent.Replace(m.Value, "\n");
+                else
+                    strContent = strContent.Replace(m.Value, "<blank>");
+                blnAtLeastOneChange = true;
+            }
+            if (blnAtLeastOneChange)
+                strContent = RemoveSuccessiveTags(strContent);
+            return strContent;
+        }
+
+        private static String RemoveEmptyLines(String strContent)
+        {
+            string strCleanedContent = "";
+            foreach (String strLine in strContent.Split('\n'))
+                if (!String.IsNullOrWhiteSpace(strLine))
+                    strCleanedContent += strLine + "\n";
+            strCleanedContent = Regex.Replace(strCleanedContent, @"\s{2,}", "");
+            return strCleanedContent;
+        }
+
         private static String LookingForContent(String strContent)
         {
             Decimal decBestScore = 0;
@@ -149,7 +173,7 @@ namespace Article_Content_Extractor
             foreach (Match mBegin in Regex.Matches(strContent, @"<[\w]+[\r\n\s]*>"))
             {
                 String strSelectedContent = strContent.Substring(mBegin.Index + mBegin.Value.Length);
-                foreach (Match mEnd in Regex.Matches(strSelectedContent, @"<\/[\w]+[\r\n\s]*>"))
+                foreach (Match mEnd in Regex.Matches(strSelectedContent, @"<\/?[\w]+[\r\n\s]*>"))
                 {
                     String strFinalSelection = strSelectedContent.Substring(0, mEnd.Index);
                     Decimal decScore = GetScore(strFinalSelection);
@@ -171,9 +195,8 @@ namespace Article_Content_Extractor
                 intNbBalise++;
                 strContent = strContent.Replace(m.Value, "");
             }
-            strContent = Regex.Replace(strContent, @"\s{2,}", "");
 
-            if (intNbBalise <= 3)
+            if (intNbBalise <= 2)
                 return 0;
             else
                 return strContent.Length / (decimal)intNbBalise;

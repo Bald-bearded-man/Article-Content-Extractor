@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Article-Content-Extractor", "Article-Content-Extractor\Article-Content-Extractor.csproj", "{650AAC03-4492-45F7-8210-7875E859AE82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Article-Content-Extractor", "Article-Content-Extractor\Article-Content-Extractor.csproj", "{650AAC03-4492-45F7-8210-7875E859AE82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtractorTest", "ExtractorTest\ExtractorTest.csproj", "{855F0794-06FD-4741-826F-10EFA730A491}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{650AAC03-4492-45F7-8210-7875E859AE82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{650AAC03-4492-45F7-8210-7875E859AE82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{650AAC03-4492-45F7-8210-7875E859AE82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{855F0794-06FD-4741-826F-10EFA730A491}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{855F0794-06FD-4741-826F-10EFA730A491}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{855F0794-06FD-4741-826F-10EFA730A491}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{855F0794-06FD-4741-826F-10EFA730A491}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
