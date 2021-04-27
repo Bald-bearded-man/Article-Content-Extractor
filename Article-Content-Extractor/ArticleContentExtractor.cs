@@ -9,6 +9,14 @@ namespace Article_Content_Extractor
 {
     public class ArticleContentExtractor
     {
+        #region Events
+
+        public static event ContentExtractedDelegate OnContentExtracted;
+
+        #endregion
+
+        #region Public methods
+
         /// <summary>
         /// Extract content from HTML fetched from URL
         /// </summary>
@@ -19,6 +27,18 @@ namespace Article_Content_Extractor
             WebClient wc = new WebClient();
             String strContent = wc.DownloadString(strURL);
             return GetArticleContentFromRawHTML(strContent);
+        }
+
+        /// <summary>
+        /// Extract content from HTML fetched from URL
+        /// </summary>
+        /// <param name="strURL"></param>
+        /// <returns></returns>
+        public static void GetArticleContentFromURLAsync(String strURL)
+        {
+            WebClient wc = new WebClient();
+            wc.DownloadStringCompleted += wc_DownloadStringCompleted; ;
+            wc.DownloadStringAsync(new Uri(strURL));
         }
 
         /// <summary>
@@ -42,6 +62,14 @@ namespace Article_Content_Extractor
             return OptimiseContent(strContent);
         }
 
+        #endregion
+
+        #region Private methods
+
+        private static void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            OnContentExtracted(null, new ContentExtractedEventArgs(GetArticleContentFromRawHTML(e.Result)));
+        }
 
         private static String RemoveScripts(String strContent)
         {
@@ -211,5 +239,23 @@ namespace Article_Content_Extractor
             strContent =  Regex.Replace(strContent, @"<\/?[\w]+[\r\n\s]*>", "\n");
             return HttpUtility.HtmlDecode(strContent);
         }
+
+        #endregion
+
+        #region Events
+
+        public delegate void ContentExtractedDelegate(object sender, ContentExtractedEventArgs args);
+
+        public class ContentExtractedEventArgs : EventArgs
+        {
+            public String Content { get; set; }
+
+            public ContentExtractedEventArgs(String strContent)
+            {
+                Content = strContent;
+            }
+        }
+
+        #endregion
     }
 }
