@@ -11,8 +11,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageIcon>bald-bearded-man_512x512_white.png</PackageIcon>
-    <Description>Little API to extract an article or a page content from URL or RAW HTML (Like news content).</Description>
-    <PackageTags>news article content page</PackageTags>
+    <Description>Little API to extract an article or a page's content from URL or RAW HTML (Like news content) and get the most meaningful text</Description>
+    <PackageTags>news article content page extract html</PackageTags>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
