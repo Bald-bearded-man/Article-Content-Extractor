@@ -57,9 +57,9 @@ namespace Article_Content_Extractor
             strContent = RemoveUnwantedTags(strContent);
             strContent = RemovingUnusedTags(strContent);
             strContent = RemoveSuccessiveTags(strContent);
-            strContent = RemoveEmptyLines(strContent);
             strContent = LookingForContent(strContent);
-            return OptimiseContent(strContent);
+            strContent = OptimiseContent(strContent);
+            return RemoveEmptyLines(strContent);
         }
 
         #endregion
@@ -73,41 +73,17 @@ namespace Article_Content_Extractor
 
         private static String RemoveScripts(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, @"<script.*>((?!<\/?script>)[.\s\S])*<\/script>"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveScripts(strContent);
-            return strContent;
+            return Regex.Replace(strContent, @"<script.*>((?!<\/?script>)[.\s\S])*<\/script>", "");
         }
 
         private static String RemoveHeaders(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<head>[.\\s\\S]*</head>"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveHeaders(strContent);
-            return strContent;
+            return Regex.Replace(strContent, "<head>[.\\s\\S]*</head>", "");
         }
 
         private static String RemoveSoloTags(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+[\\w\\t\\r\\n\\s\"'’   \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+[\\/]>"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveSoloTags(strContent);
-            return strContent;
+            return Regex.Replace(strContent, "<[a-zA-Z]+[\\w\\t\\r\\n\\s\"'’   \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+[\\/]>", "");
         }
 
         private static String CleanAttributes(String strContent)
@@ -125,50 +101,25 @@ namespace Article_Content_Extractor
 
         private static String RemoveEmptyTags(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, @"<[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*<\/[A-Z-a-z0-9]+[\s\r\n]*>"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveEmptyTags(strContent);
-            return strContent;
+            return Regex.Replace(strContent, @"<[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*<\/[A-Z-a-z0-9]+[\s\r\n]*>", "");
         }
 
         private static String RemoveComments(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, @"<!--((?!-->).)*-->"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveComments(strContent);
-            return strContent;
+            return Regex.Replace(strContent, @"<!--((?!-->).)*-->", "");
         }
 
         private static String RemoveUnwantedTags(String strContent)
         {
-            bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, @"(<button[\s\r\n]*>((?!<\/button)([\r\n]|.))*<\/button[\s\r\n]*>)|(<nav[\s\r\n]*>((?!<\/nav)([\r\n]|.))*<\/nav[\s\r\n]*>)"))
-            {
-                strContent = strContent.Replace(m.Value, "");
-                blnAtLeastOneChange = true;
-            }
-            if (blnAtLeastOneChange)
-                strContent = RemoveUnwantedTags(strContent);
-            return strContent;
+            return Regex.Replace(strContent, @"(<button[\s\r\n]*>((?!<\/button)([\r\n]|.))*<\/button[\s\r\n]*>)|(<nav[\s\r\n]*>((?!<\/nav)([\r\n]|.))*<\/nav[\s\r\n]*>)", "");
         }
 
         private static String RemovingUnusedTags(String strContent)
         {
             strContent = Regex.Replace(strContent, @"<p[\s\r\n]*>", "");
-            strContent = Regex.Replace(strContent, @"<\/p[\s\r\n]*>", "\n");
+            strContent = Regex.Replace(strContent, @"<\/(p|li|h[0-9])[\s\r\n]*>", " \n");
             strContent = Regex.Replace(strContent, @"<\/?(a|em)[\s\r\n]*>", "");
             strContent = Regex.Replace(strContent, @"<h[0-9][\s\r\n]*>", "");
-            strContent = Regex.Replace(strContent, @"<\/h[0-9][\s\r\n]*>", "\n");
             return strContent;
         }
 
@@ -178,7 +129,7 @@ namespace Article_Content_Extractor
             foreach (Match m in Regex.Matches(strContent, @"<\/?[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*(<\/?[A-Z-a-z0-9]+[\s\r\n]*>[\s\r\n]*)+"))
             {
                 if (Regex.IsMatch(strContent, @"<\/p[\s\r\n]*>"))
-                    strContent = strContent.Replace(m.Value, "\n");
+                    strContent = strContent.Replace(m.Value, " \n");
                 else
                     strContent = strContent.Replace(m.Value, "<blank>");
                 blnAtLeastOneChange = true;
@@ -191,10 +142,21 @@ namespace Article_Content_Extractor
         private static String RemoveEmptyLines(String strContent)
         {
             string strCleanedContent = "";
+            bool blnLastWasEmpty = false;
             foreach (String strLine in strContent.Split('\n'))
+            {
                 if (!String.IsNullOrWhiteSpace(strLine))
+                {
                     strCleanedContent += strLine + "\n";
-            strCleanedContent = Regex.Replace(strCleanedContent, @"\s{2,}", "");
+                    blnLastWasEmpty = false;
+                }
+                else if (!blnLastWasEmpty)
+                {
+                    strCleanedContent += strLine + "\n";
+                    blnLastWasEmpty = true;
+                }
+            }
+            strCleanedContent = Regex.Replace(strCleanedContent, @"[ ]{2,}", " ");
             return strCleanedContent;
         }
 
@@ -236,7 +198,7 @@ namespace Article_Content_Extractor
 
         private static String OptimiseContent(String strContent)
         {
-            strContent =  Regex.Replace(strContent, @"<\/?[\w]+[\r\n\s]*>", "\n");
+            strContent =  Regex.Replace(strContent, @"<\/?[\w]+[\r\n\s]*>", " \n");
             return HttpUtility.HtmlDecode(strContent);
         }
 
