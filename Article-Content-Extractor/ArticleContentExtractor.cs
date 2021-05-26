@@ -113,7 +113,7 @@ namespace Article_Content_Extractor
         private static String CleanAttributes(String strContent)
         {
             bool blnAtLeastOneChange = false;
-            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+ ([\\w\\r\\n\\s\\\"'’ \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+)>"))
+            foreach (Match m in Regex.Matches(strContent, "<[a-zA-Z]+( [\\w\\r\\n\\s\\\"'’ \\/:\\-\\.= &*#;,À-ÿ\\(\\)+%«»?|]+)>"))
             {
                 strContent = strContent.Replace(m.Groups[1].Value, "");
                 blnAtLeastOneChange = true;
